@@ -1,0 +1,8 @@
+# Rust build output
+/target
+
+# Generated lemma-FST build artifacts (regeneratable via build_fst.py + the
+# build_lemma_fst Rust binary; published to GitHub Releases, not committed).
+/scripts/artifacts/
+# Downloaded spaCy source JSON (fetched + SHA-256-verified by build_fst.py).
+/scripts/raw/
