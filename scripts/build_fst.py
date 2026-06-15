@@ -5,7 +5,7 @@ Source data (MIT):
   es: https://raw.githubusercontent.com/explosion/spacy-lookups-data/master/spacy_lookups_data/data/es_lemma_lookup.json
   en: https://raw.githubusercontent.com/explosion/spacy-lookups-data/master/spacy_lookups_data/data/en_lemma_lookup.json
 
-Commit: f0f0fca21b8c5f9afe60add3faa2c46082b1f2e4 (pinned 2026-06-15)
+Commit: 3322e0c1d2720d4121646a092091620e213eff74 (pinned 2026-06-15)
 Per-file SHA-256 verified below.
 
 Output: {lang}.lemma.fst  (fst 0.4 Map format, keys in lexicographic byte order)
@@ -38,13 +38,12 @@ from pathlib import Path
 
 SOURCES = {
     "es": {
-        "url": "https://raw.githubusercontent.com/explosion/spacy-lookups-data/f0f0fca21b8c5f9afe60add3faa2c46082b1f2e4/spacy_lookups_data/data/es_lemma_lookup.json",
-        # SHA-256 of the raw JSON file at that commit
-        "sha256": "TODO_FILL_AFTER_DOWNLOAD",
+        "url": "https://raw.githubusercontent.com/explosion/spacy-lookups-data/3322e0c1d2720d4121646a092091620e213eff74/spacy_lookups_data/data/es_lemma_lookup.json",
+        "sha256": "eeda20604e4e5423732b5ff73fe8970b063dbf678d4483e5b37eb4bcdd55b28c",
     },
     "en": {
-        "url": "https://raw.githubusercontent.com/explosion/spacy-lookups-data/f0f0fca21b8c5f9afe60add3faa2c46082b1f2e4/spacy_lookups_data/data/en_lemma_lookup.json",
-        "sha256": "TODO_FILL_AFTER_DOWNLOAD",
+        "url": "https://raw.githubusercontent.com/explosion/spacy-lookups-data/3322e0c1d2720d4121646a092091620e213eff74/spacy_lookups_data/data/en_lemma_lookup.json",
+        "sha256": "7511ba4754a809f3151742936c4d79de93879da7a6d73817ddb0ecfe6a160516",
     },
 }
 

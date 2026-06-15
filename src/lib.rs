@@ -37,9 +37,8 @@ impl EngineConfig {
         Self {
             data_dir,
             lang: "en".into(),
-            // TODO(task 1.4): replace with hosted artifact URL + SHA
-            source_url: "https://raw.githubusercontent.com/LudoBermejoES/corylus-lemmatization/master/artifacts/en.lemma.tar.gz".into(),
-            source_sha256: "TODO_FILL_SHA256_AFTER_HOSTING".into(),
+            source_url: "https://github.com/LudoBermejoES/corylus-lemma/releases/download/v1.0.0/en.lemma.tar.gz".into(),
+            source_sha256: "78a4f605c6155d8cba9bc30b7f453b091ce981acf6cbd4dc7ef8321dca76f99c".into(),
         }
     }
 
@@ -47,8 +46,8 @@ impl EngineConfig {
         Self {
             data_dir,
             lang: "es".into(),
-            source_url: "https://raw.githubusercontent.com/LudoBermejoES/corylus-lemmatization/master/artifacts/es.lemma.tar.gz".into(),
-            source_sha256: "TODO_FILL_SHA256_AFTER_HOSTING".into(),
+            source_url: "https://github.com/LudoBermejoES/corylus-lemma/releases/download/v1.0.0/es.lemma.tar.gz".into(),
+            source_sha256: "b328f0e2e1e6ee8b93a4be6167e6deefbfedf409a695fb8f79eaec1ce6ce188e".into(),
         }
     }
 }
