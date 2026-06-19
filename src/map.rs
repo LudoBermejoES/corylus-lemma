@@ -2,7 +2,9 @@
 //! Loaded once at engine startup, held behind Arc, never re-opened per lookup.
 
 use fst::Map;
+use std::collections::HashSet;
 use std::path::Path;
+use std::sync::OnceLock;
 use crate::{LemmatizationError, Result};
 
 pub struct LoadedMap {
@@ -10,6 +12,8 @@ pub struct LoadedMap {
     map: Map<Vec<u8>>,
     /// Ordinal → lemma string, aligned with the fst values.
     lemmas: Vec<String>,
+    /// Lazily-built set of lemma strings for O(1) base-form membership checks.
+    lemma_set: OnceLock<HashSet<String>>,
 }
 
 impl LoadedMap {
@@ -24,7 +28,7 @@ impl LoadedMap {
         let lemmas: Vec<String> = serde_json::from_str(&lemmas_raw)
             .map_err(|e| LemmatizationError::CorruptMap(format!("parse lemmas: {e}")))?;
 
-        Ok(Self { map, lemmas })
+        Ok(Self { map, lemmas, lemma_set: OnceLock::new() })
     }
 
     /// Resolve a surface form to its lemma.
@@ -48,18 +52,20 @@ impl LoadedMap {
                 return lemma.clone();
             }
         }
-        // On miss, try enclitic candidates
+        // On miss, try enclitic candidates. A candidate is only accepted if it is
+        // a REAL word: either an inflected key in the map, or a known base form
+        // (a value in `lemmas`). The previous heuristic accepted any 2+ char
+        // lowercase stem, which corrupted ordinary words that merely end in a
+        // clitic-looking sequence — "malo" → "ma", "pelo" → "pe", "solo" → "so".
         for candidate in crate::enclitic::enclitic_candidates(&lower) {
             if let Some(ordinal) = self.map.get(candidate.as_bytes()) {
                 if let Some(lemma) = self.lemmas.get(ordinal as usize) {
                     return lemma.clone();
                 }
             }
-            // Also try the candidate itself as identity (if it's a known base form)
-            // spaCy identity: base forms are values not keys, so if candidate is not
-            // in the table it may still be a valid base form — return it as is.
-            // We only do this for 2+ character candidates to avoid noise.
-            if candidate.len() >= 2 && self.looks_like_base(&candidate) {
+            // spaCy identity: base forms are values, not keys. Accept the candidate
+            // only if it is actually a known lemma — never a speculative stem.
+            if self.is_known_lemma(&candidate) {
                 return candidate;
             }
         }
@@ -67,11 +73,11 @@ impl LoadedMap {
         surface.to_string()
     }
 
-    /// Heuristic: a candidate "looks like a base form" if it is all lowercase
-    /// and at least 2 chars (very conservative — true identity test would require
-    /// checking the lemmas array, but we'd need a reverse index).
-    fn looks_like_base(&self, word: &str) -> bool {
-        word.len() >= 2 && word.chars().all(|c| c.is_lowercase() || c == '-' || c == '\'')
+    /// True if `word` is a known base form (a value in the lemma table).
+    fn is_known_lemma(&self, word: &str) -> bool {
+        self.lemma_set
+            .get_or_init(|| self.lemmas.iter().cloned().collect())
+            .contains(word)
     }
 
     #[allow(dead_code)]

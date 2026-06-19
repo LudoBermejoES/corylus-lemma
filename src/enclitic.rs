@@ -75,8 +75,17 @@ pub fn enclitic_candidates(word: &str) -> Vec<String> {
             for v in accent_variants(&stem) {
                 candidates.push(v);
             }
-            // First-person-plural -s drop: if stem ends in -s, try without
-            // e.g. vámonos → vamos → vam (don't further strip; just try vamos)
+            // First-person-plural reconstruction: the verb's final -s is dropped
+            // before the clitic -nos (vamos + nos → vámonos). Recovering the verb
+            // means RE-ADDING the -s: vámonos → strip "nos" → "vámo" → "vámos" →
+            // accent variant "vamos". (We also try the -s-dropped form for the
+            // rarer case where a real stem ends in -s before a clitic.)
+            if sc == "nos" {
+                let with_s = format!("{stem}s");
+                for v in accent_variants(&with_s) {
+                    candidates.push(v);
+                }
+            }
             if stem.ends_with('s') && stem.len() > 1 {
                 let without_s = &stem[..stem.len() - 1];
                 for v in accent_variants(without_s) {
