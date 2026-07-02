@@ -78,15 +78,14 @@ pub struct LemmatizationEngine {
 
 impl LemmatizationEngine {
     pub fn new(config: EngineConfig) -> Self {
-        let initial_state = if state::is_installed_for(&config) {
-            LemmatizationState::NotInstalled // will be upgraded to Ready after map load
-        } else {
-            LemmatizationState::NotInstalled
-        };
+        // Starting state is always NotInstalled regardless of whether the map is
+        // already installed — if it is, try_load_map below unconditionally sets
+        // state to Ready on success (or Error on failure), so this initial value
+        // is only ever observed for the instant before that probe runs.
         let engine = Self {
             inner: Arc::new(Mutex::new(Inner {
                 config,
-                state: initial_state,
+                state: LemmatizationState::NotInstalled,
                 loaded_map: None,
             })),
         };
@@ -105,11 +104,9 @@ impl LemmatizationEngine {
         let mut inner = self.inner.lock().unwrap();
         inner.config.data_dir = data_dir;
         inner.loaded_map = None;
-        inner.state = if state::is_installed_for(&inner.config) {
-            LemmatizationState::NotInstalled // probe will upgrade
-        } else {
-            LemmatizationState::NotInstalled
-        };
+        // See `new()`: state resets to NotInstalled either way — the probe below
+        // unconditionally upgrades it to Ready/Error when the map load runs.
+        inner.state = LemmatizationState::NotInstalled;
         drop(inner);
         if state::is_installed_for(&self.inner.lock().unwrap().config) {
             let _ = provision::try_load_map(self.inner.clone());

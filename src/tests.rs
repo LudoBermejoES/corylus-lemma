@@ -3,7 +3,6 @@
 //! Integration tests that require the real downloaded data are in integration_tests.rs.
 
 use super::*;
-use std::path::PathBuf;
 use tempfile::TempDir;
 
 /// Build a minimal in-memory engine for testing by writing temp FST + lemmas files.
@@ -58,6 +57,18 @@ fn make_test_engine(lang: &str, pairs: &[(&str, &str)]) -> (TempDir, Lemmatizati
     };
     let engine = LemmatizationEngine::new(config);
     (dir, engine)
+}
+
+// Regression test: `new()` used to have a redundant
+// `if is_installed_for(&config) { NotInstalled } else { NotInstalled }` branch
+// (both arms identical, with a comment claiming an "upgrade to Ready" that
+// happens via `try_load_map` right after — not via this branch). Confirms
+// `new()` still ends up `Ready` when a valid map is already on disk at
+// construction time (the exact case the dead branch checked).
+#[test]
+fn engine_new_reaches_ready_when_map_already_installed_on_disk() {
+    let (_dir, engine) = make_test_engine("es", &[("corriendo", "correr")]);
+    assert_eq!(engine.state(), LemmatizationState::Ready);
 }
 
 // ── Spanish verb tests ──────────────────────────────────────────────────────
